@@ -23,3 +23,6 @@ LLaMA – Local AI model for generating responses
 HTML, CSS, JavaScript – Frontend chat interface
 
 👉 With Medibot, users can experience an offline, secure, and private healthcare assistant powered by AI.
+
+
+To view the working of the bot https://medibot-2-htwd.onrender.com vist this link
