@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MediBot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            z-index: 10;
+
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        #chat-box { 
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            height: 500px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        #chat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        #chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chat-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        #chat-box::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        .user { 
+            margin: 15px 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 20px 20px 5px 20px;
+            max-width: 70%;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .bot { 
+            margin: 15px 0;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .bot .message-bubble {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 20px 20px 20px 5px;
+            max-width: 70%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .message-bubble b {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        #message-box { 
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #message { 
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            border-radius: 50px;
+        }
+
+        #message::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        button { 
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff6b6b !important;
+            background: rgba(255, 107, 107, 0.1) !important;
+            border: 1px solid rgba(255, 107, 107, 0.3) !important;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            #chat-box {
+                height: 400px;
+            }
+            
+            .user .message-bubble,
+            .bot .message-bubble {
+                max-width: 85%;
+            }
+        }
+        /* Theme toggle button style */
+#theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 50;
+    transition: color 0.3s ease;
+}
+
+#theme-toggle:hover {
+    color: #667eea;
+}
+
+/* Light theme styles */
+body.light-theme {
+    background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 50%, #d0d0d0 100%);
+    color: #222;
+}
+
+body.light-theme #chat-box {
+    background: rgba(255, 255, 255, 0.9);
+    color: #222;
+    border: 1px solid #ccc;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+body.light-theme #chat-box::before {
+    background: none;
+}
+
+body.light-theme .user .message-bubble {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+body.light-theme .bot .message-bubble {
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    color: #222;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme #message-box {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme #message {
+    color: #222;
+}
+
+body.light-theme button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+body.light-theme button:hover {
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MediBot</h1>
+            <p>Your AI Medical Assistant</p>
+        </div>
+        
+        <div id="chat-box"></div>
+        
+        <div id="message-box">
+            <input type="text" id="message" placeholder="Ask me anything about health and medicine...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <button id="theme-toggle" aria-label="Toggle light/dark theme">🌞</button>
+    <script>
+        async function sendMessage() {
+            let message = document.getElementById("message").value;
+            if (!message.trim()) return;
+
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class='user'><div class='message-bubble'><b>You:</b> ${message}</div></div>`;
+            document.getElementById("message").value = "";
+
+            try {
+                let response = await fetch("/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                let data = await response.json();
+
+                // ✅ Fix: Convert newlines to <br> so each point comes in new line
+                let formattedReply = data.reply.replace(/\n/g, "<br>");
+
+                chatBox.innerHTML += `<div class='bot'><div class='message-bubble'><b>Bot:</b> ${formattedReply}</div></div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (error) {
+                chatBox.innerHTML += `<div class='bot'><div class='message-bubble error-message'><b>Error:</b> ${error.message}</div></div>`;
+            }
+        }
+
+        document.getElementById("message").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+        const themeToggleBtn = document.getElementById("theme-toggle");
+        themeToggleBtn.addEventListener("click", () => {
+        document.body.classList.toggle("light-theme");
+        if (document.body.classList.contains("light-theme")) {
+          themeToggleBtn.textContent = "🌙"; 
+        } else {
+            themeToggleBtn.textContent = "🌞"; 
+        }
+    });
+    </script>
+</body>
+</html>
